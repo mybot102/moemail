@@ -6,6 +6,9 @@ import { accounts, sessions, users, roles, userRoles } from "./schema"
 import { eq } from "drizzle-orm"
 import { getRequestContext } from "@cloudflare/next-on-pages"
 import { Permission, hasPermission, ROLES, Role } from "./permissions"
+import CredentialsProvider from "next-auth/providers/credentials"
+import { hashPassword, comparePassword } from "@/lib/utils"
+import { authSchema } from "@/lib/validation"
 
 const ROLE_DESCRIPTIONS: Record<Role, string> = {
   [ROLES.EMPEROR]: "皇帝（网站所有者）",
@@ -77,6 +80,34 @@ export const {
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID,
       clientSecret: process.env.AUTH_GITHUB_SECRET,
+    }),
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        username: { label: "用户名", type: "text", required: true },
+        password: { label: "密码", type: "password", required: true }
+      },
+      async authorize(credentialDTO) {
+
+          const parsedCredentials = authSchema.parse({
+            username: credentialDTO.username,
+            password: credentialDTO.password,
+          })
+
+          const db = createDb()
+          const user = await db.query.users.findFirst({
+            where: eq(users.username, parsedCredentials.username),
+          })
+
+          console.log('user', user)
+
+          if (!user?.password) throw new Error("用户名或密码错误")
+
+          const isValid = await comparePassword(parsedCredentials.password, user.password)
+          if (!isValid) throw new Error("用户名或密码错误")
+
+          return user
+      }
     })
   ],
   events: {
@@ -133,3 +164,26 @@ export const {
     },
   }
 }))
+
+export async function register(username: string, password: string) {
+  const db = createDb()
+  
+  const existing = await db.query.users.findFirst({
+    where: eq(users.username, username)
+  })
+
+  if (existing) {
+    throw new Error("用户名已存在")
+  }
+
+  const hashedPassword = await hashPassword(password)
+  
+  const [user] = await db.insert(users)
+    .values({
+      username,
+      password: hashedPassword,
+    })
+    .returning()
+
+  return user
+}
