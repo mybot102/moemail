@@ -106,7 +106,7 @@ export const {
           const isValid = await comparePassword(parsedCredentials.password, user.password)
           if (!isValid) throw new Error("用户名或密码错误")
 
-          return user
+          return { ...user, password: undefined }
       }
     })
   ],

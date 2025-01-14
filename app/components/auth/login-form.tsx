@@ -88,12 +88,20 @@ export function LoginForm() {
       const result = await signIn("credentials", {
         username,
         password,
-        callbackUrl: "/moe",
+        redirect: false,
       })
 
       if (result?.error) {
-        throw new Error("用户名或密码错误")
+        toast({
+          title: "登录失败",
+          description: "用户名或密码错误",
+          variant: "destructive",
+        })
+        setLoading(false)
+        return
       }
+
+      window.location.href = "/"
     } catch (error) {
       toast({
         title: "登录失败",
