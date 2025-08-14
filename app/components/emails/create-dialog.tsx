@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Copy, Plus, RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
-import { nanoid } from "nanoid"
+import { customAlphabet } from "nanoid" // changed: use customAlphabet instead of nanoid
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -18,6 +18,9 @@ interface CreateDialogProps {
   onEmailCreated: () => void
 }
 
+// restricted alphabet: lowercase letters + digits, length 8
+const nanoidLower = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 8)
+
 export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
   const { config } = useConfig()  
   const [open, setOpen] = useState(false)
@@ -28,7 +31,7 @@ export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
   const { toast } = useToast()
   const { copyToClipboard } = useCopy()
 
-  const generateRandomName = () => setEmailName(nanoid(8))
+  const generateRandomName = () => setEmailName(nanoidLower()) // changed
 
   const copyEmailAddress = () => {
     copyToClipboard(`${emailName}@${currentDomain}`)
@@ -150,22 +153,22 @@ export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
             </RadioGroup>
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="shrink-0">完整邮箱地址将为:</span>
-            {emailName ? (
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="truncate">{`${emailName}@${currentDomain}`}</span>
-                <div
-                  className="shrink-0 cursor-pointer hover:text-primary transition-colors"
-                  onClick={copyEmailAddress}
-                >
-                  <Copy className="size-4" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="shrink-0">完整邮箱地址将为:</span>
+              {emailName ? (
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="truncate">{`${emailName}@${currentDomain}`}</span>
+                  <div
+                    className="shrink-0 cursor-pointer hover:text-primary transition-colors"
+                    onClick={copyEmailAddress}
+                  >
+                    <Copy className="size-4" />
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <span className="text-gray-400">...</span>
-            )}
-          </div>
+              ) : (
+                <span className="text-gray-400">...</span>
+              )}
+            </div>
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
@@ -178,4 +181,4 @@ export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
       </DialogContent>
     </Dialog>
   )
-} 
+}
