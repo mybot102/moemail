@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Copy, Plus, RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
-import { nanoid } from "nanoid"
+import { customAlphabet } from "nanoid"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -18,6 +18,9 @@ interface CreateDialogProps {
   onEmailCreated: () => void
 }
 
+// Added: restricted random ID generator (lowercase letters + digits only)
+const nanoidLower = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 8)
+
 export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
   const { config } = useConfig()  
   const [open, setOpen] = useState(false)
@@ -28,7 +31,7 @@ export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
   const { toast } = useToast()
   const { copyToClipboard } = useCopy()
 
-  const generateRandomName = () => setEmailName(nanoid(8))
+  const generateRandomName = () => setEmailName(nanoidLower())
 
   const copyEmailAddress = () => {
     copyToClipboard(`${emailName}@${currentDomain}`)
