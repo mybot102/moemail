@@ -1,5 +1,5 @@
 export const EMAIL_CONFIG = {
-  MAX_ACTIVE_EMAILS: 30, // Maximum number of active emails
+  MAX_ACTIVE_EMAILS: 1000, // Maximum number of active emails
   POLL_INTERVAL: 10_000, // Polling interval in milliseconds
   DEFAULT_DAILY_SEND_LIMITS: {
     emperor: 0,   // 皇帝无限制
